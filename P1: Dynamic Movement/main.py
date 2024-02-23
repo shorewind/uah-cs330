@@ -127,13 +127,56 @@ class Character:
 		return {"linear": self.velocity}
 
 	def get_seek_steering(self):
-		pass
+		dir_x = self.target.position[0] - self.position[0]
+		dir_y = self.target.position[1] - self.position[1]
+
+		dir_vec = [dir_x, dir_y]
+		linear_accel = vectorNormalize(dir_vec)
+		linear_accel *= self.max_vel
+
+		return {"linear": linear_accel}
 
 	def get_flee_steering(self):
-		pass
+		dir_x = self.position[0] - self.target.position[0]
+		dir_y = self.position[1] - self.target.position[1]
+
+		dir_vec = [dir_x, dir_y]
+		linear_accel = vectorNormalize(dir_vec)
+		linear_accel *= self.max_vel
+
+		return {"linear": linear_accel}
 	
 	def get_arrive_steering(self):
-		pass
+		dir_x = self.target.position[0] - self.position[0]
+		dir_y = self.target.position[1] - self.position[1]
+
+		dir_vec = [dir_x, dir_y]
+		distance = vectorLength(dir_vec)
+
+		if distance < self.arrival_radius:
+			return {"linear": self.velocity}
+
+		if distance > self.slowing_radius:
+			target_speed = self.max_vel
+		else:
+			target_speed = self.max_vel * distance / self.slowing_radius
+
+		target_vel = vectorNormalize(dir_vec)
+		target_vel *= target_speed
+
+		linear_accel_x = target_vel[0] - self.velocity[0]
+		linear_accel_y = target_vel[1] - self.velocity[1]
+		
+		linear_accel_x /= self.time_to_target
+		linear_accel_y /= self.time_to_target
+
+		linear_accel = [linear_accel_x, linear_accel_y]
+
+		if vectorLength(linear_accel) > self.max_accel:
+			linear_accel = vectorNormalize(linear_accel)
+			linear_accel *= self.max_accel
+
+		return {"linear": linear_accel}
 
 	def update_position(self, steering_output):
 		self.position[0] += self.velocity[0]*time_step
@@ -142,10 +185,11 @@ class Character:
 		self.velocity[0] += steering_output["linear"][0]*time_step
 		self.velocity[1] += steering_output["linear"][1]*time_step
 
-		# clip to max speed
-		if vectorLength(steering_output["linear"]) > self.max_vel:
-			vectorNormalize(steering_output["linear"])
-			steering_output["linear"] *= self.max_vel
+		self.linear_accel = [steering_output["linear"][0], steering_output["linear"][1]]
+		
+		if vectorLength(self.velocity) > self.max_vel:
+			self.velocity = vectorNormalize(self.velocity)
+			self.velocity *= self.max_vel
 
 
 char1 = Character(
