@@ -117,14 +117,14 @@ class Character:
 
 	def print_csv_data(self, timestamp):
 		return (
-				f"{timestamp}, {self.char_id}, {self.position[0]}, {self.position[1]}, "
-				f"{self.velocity[0]}, {self.velocity[1]}, {self.linear_accel[0]}, "
-				f"{self.linear_accel[1]}, {self.orientation}, {self.steering_behavior}, "
-				f"{self.collision_status}"
+			f"{timestamp}, {self.char_id}, {self.position[0]}, {self.position[1]}, "
+			f"{self.velocity[0]}, {self.velocity[1]}, {self.linear_accel[0]}, "
+			f"{self.linear_accel[1]}, {self.orientation}, {self.steering_behavior}, "
+			f"{self.collision_status}"
 		)
 
 	def get_continue_steering(self):
-		pass
+		return {"linear": self.velocity}
 
 	def get_seek_steering(self):
 		pass
@@ -135,8 +135,17 @@ class Character:
 	def get_arrive_steering(self):
 		pass
 
-	def update_position(self):
-		pass
+	def update_position(self, steering_output):
+		self.position[0] += self.velocity[0]*time_step
+		self.position[1] += self.velocity[1]*time_step
+
+		self.velocity[0] += steering_output["linear"][0]*time_step
+		self.velocity[1] += steering_output["linear"][1]*time_step
+
+		# clip to max speed
+		if vectorLength(steering_output["linear"]) > self.max_vel:
+			vectorNormalize(steering_output["linear"])
+			steering_output["linear"] *= self.max_vel
 
 
 char1 = Character(
