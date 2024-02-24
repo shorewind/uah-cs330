@@ -7,7 +7,7 @@
 import math
 
 # Helper Functions
-# calculate length (magnitude) of a 2d vector 
+# calculate length (magnitude) of a 2d vector
 def length_vec(v):
 	return math.sqrt(v[0]**2 + v[1]**2)
 
@@ -96,7 +96,7 @@ class Character:
 		linear_accel = multiply_vec(self.max_accel, linear_accel)
 
 		return {"linear": linear_accel}
-	
+
 	def get_arrive_steering(self):
 		# get direction to target
 		dir_x = self.target.position[0] - self.position[0]
@@ -113,7 +113,7 @@ class Character:
 			target_speed = self.max_vel
 		else:
 			target_speed = self.max_vel * distance / self.slowing_radius
-		
+
 		# get velocity by combining direction and speed
 		target_vel_dir = normalize_vec(dir_vec)
 		target_vel = multiply_vec(target_speed, target_vel_dir)
@@ -141,7 +141,7 @@ class Character:
 		self.velocity[1] += steering_output["linear"][1]*time_step
 
 		self.linear_accel = [steering_output["linear"][0], steering_output["linear"][1]]
-		
+
 		# clip velocity if it exceeds max velocity
 		if length_vec(self.velocity) > self.max_vel:
 			self.velocity = normalize_vec(self.velocity)
@@ -211,10 +211,10 @@ while sim_time <= total_run_time :
 	for character in characters:
 		if character.steering_behavior == CONTINUE:
 			outcome = character.get_continue_steering()
-		elif character.steering_behavior == FLEE:
-			outcome = character.get_flee_steering()
 		elif character.steering_behavior == SEEK:
 			outcome = character.get_seek_steering()
+		elif character.steering_behavior == FLEE:
+			outcome = character.get_flee_steering()
 		elif character.steering_behavior == ARRIVE:
 			outcome = character.get_arrive_steering()
 		character.update_position(outcome)
