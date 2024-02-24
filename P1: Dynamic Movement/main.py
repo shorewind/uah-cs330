@@ -6,87 +6,30 @@
 import math
 import numpy as np
 
-#vector math 
+# Helper Functions
 
-#calculate length of a 2d vector 
-def vectorLength(v):
+# calculate length of a 2d vector 
+def length_vec(v):
 	length = math.sqrt(v[0]**2 + v[1]**2)
 	return length
 
-#normalize a 2D vector
-def vectorNormalize(v):
-    length = vectorLength(v)
+# normalize a 2d vector to unit length 1
+def normalize_vec(v):
+    length = length_vec(v)
     if length != 0:
         return [v[0]/length, v[1]/length]
     else:
         return [0, 0]
 
-# Calculate scalar dot product of two 2D vectors.
-def dot(v1,v2):
-	sum = ([v1[0]*v2[0] + v1[1]*v2[1]])
-	return sum
 
-#converting an orientation in radians to a unit vector using the sine and cosine trigonometric functions.
-def vectorOrientation(orientation):
-    result = [math.sin(orientation), math.cos(orientation)]
-    return result
-
-#Geometry Functions
-#calculate the distance between two points in 2D
-def distancePointPoint(x,z):
-	distance = math.sqrt((z[1]-x[1])**2 + (z[2]-x[2])**2)
-	return distance
-
-# Calculate the distance from a point to a line in 2D.
-def distancePointLine(x, z, q):
-    x0, y0 = x
-    x1, y1 = z
-    x2, y2 = q
-    numerator = abs(((x2 - x1) * (y1 - y0)) - ((x1 - x0) * (y2 - y1)))
-    denominator = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-    return numerator / denominator
-
-# Find the point on the line closest to the query point in 2D.
-def closestPointLine(x,z,q):
-	point = dot((q - x),(z - x))
-	point /= dot((z - x), (z - x))
-	point = (x + (point * (z - x)))
-	return point
-
-# Find the point on the segment closest to the query point in 2D.
-#q is the query point and x and z are distinct points on the line
-def closestPointSegment(x,z,q):
-	point = dot((q - x), (z - x))
-	point /= dot((z - x), (z - x))
-	if (point <= 0):
-		return x
-	elif (point >= 1):
-		return z
-	else:
-		point = (x + (point * (z - x)))
-		return point
-
-# Convert an angle (in radians) to the interval [-pi, pi].
-def convertAngle(theta):
-    theta = theta % (2 * math.pi)
-    if abs(theta) > math.pi:
-        theta = theta - (2 * math.pi * (theta / abs(theta)))
-    return theta
-
-
-
-# dynamic movement behaviors
+# Dynamic Movement Behaviors
 CONTINUE = 1
 SEEK = 5
 FLEE = 7
-ARRIVE = 8
-
-total_run_time = 50
-time_step = 0.5
-num_time_steps = int(total_run_time / time_step)
-sim_time = 0
+ARRIVE = 8  # global constants
 
 class Character:
+	# parameterized constructor with default values
 	def __init__(self,
 				char_id=0,
 				steering_behavior=CONTINUE,
@@ -115,6 +58,7 @@ class Character:
 		self.time_to_target = time_to_target
 		self.collision_status = collision_status
 
+	# output data in comma-separated values format
 	def print_csv_data(self, timestamp):
 		return (
 			f"{timestamp}, {self.char_id}, {self.position[0]}, {self.position[1]}, "
@@ -124,61 +68,70 @@ class Character:
 		)
 
 	def get_continue_steering(self):
-		return {"linear": self.velocity}
+		# steering unchanged
+		return {"linear": self.accel}
 
 	def get_seek_steering(self):
+		# get direction to target
 		dir_x = self.target.position[0] - self.position[0]
 		dir_y = self.target.position[1] - self.position[1]
-
 		dir_vec = [dir_x, dir_y]
-		linear_accel = vectorNormalize(dir_vec)
-		linear_accel *= self.max_vel
+
+		# use max accel along direction
+		linear_accel = normalize_vec(dir_vec)
+		linear_accel *= self.max_accel
 
 		return {"linear": linear_accel}
 
 	def get_flee_steering(self):
+		# get direction directly away from target
 		dir_x = self.position[0] - self.target.position[0]
 		dir_y = self.position[1] - self.target.position[1]
-
 		dir_vec = [dir_x, dir_y]
-		linear_accel = vectorNormalize(dir_vec)
-		linear_accel *= self.max_vel
+
+		# use max accel along direction
+		linear_accel = normalize_vec(dir_vec)
+		linear_accel *= self.max_accel
 
 		return {"linear": linear_accel}
 	
 	def get_arrive_steering(self):
+		# get direction to target
 		dir_x = self.target.position[0] - self.position[0]
 		dir_y = self.target.position[1] - self.position[1]
-
 		dir_vec = [dir_x, dir_y]
-		distance = vectorLength(dir_vec)
 
+		# if within arrival radius, no steering
+		distance = length_vec(dir_vec)
 		if distance < self.arrival_radius:
-			return {"linear": self.velocity}
+			return {"linear": [0.0, 0.0]}
 
+		# if within slowing radius, set scaled speed, otherwise max speed
 		if distance > self.slowing_radius:
 			target_speed = self.max_vel
 		else:
 			target_speed = self.max_vel * distance / self.slowing_radius
-
-		target_vel = vectorNormalize(dir_vec)
+		
+		# get velocity by combining direction and speed
+		target_vel = normalize_vec(dir_vec)
 		target_vel *= target_speed
 
+		# set accel to get to target vel
 		linear_accel_x = target_vel[0] - self.velocity[0]
 		linear_accel_y = target_vel[1] - self.velocity[1]
-		
 		linear_accel_x /= self.time_to_target
 		linear_accel_y /= self.time_to_target
-
 		linear_accel = [linear_accel_x, linear_accel_y]
 
-		if vectorLength(linear_accel) > self.max_accel:
-			linear_accel = vectorNormalize(linear_accel)
+		# clip accel if it exceeds max accel
+		if length_vec(linear_accel) > self.max_accel:
+			linear_accel = normalize_vec(linear_accel)
 			linear_accel *= self.max_accel
 
 		return {"linear": linear_accel}
 
 	def update_position(self, steering_output):
+		# set new position, velocity, and linear accel
 		self.position[0] += self.velocity[0]*time_step
 		self.position[1] += self.velocity[1]*time_step
 
@@ -187,11 +140,14 @@ class Character:
 
 		self.linear_accel = [steering_output["linear"][0], steering_output["linear"][1]]
 		
-		if vectorLength(self.velocity) > self.max_vel:
-			self.velocity = vectorNormalize(self.velocity)
+		# clip velocity if it exceeds max velocity
+		if length_vec(self.velocity) > self.max_vel:
+			self.velocity = normalize_vec(self.velocity)
 			self.velocity *= self.max_vel
 
 
+# Simulation
+# intialize four character objects with different steering behaviors
 char1 = Character(
     char_id=2601
 )
@@ -235,6 +191,13 @@ char4 = Character(
 
 characters = [char1, char2, char3, char4]
 
+# simulation time parameters
+total_run_time = 50
+time_step = 0.5
+num_time_steps = int(total_run_time / time_step)
+sim_time = 0
+
+# run simulation and print to output file
 output_file = open("data.txt", 'w')
 
 with open("data.txt", 'a') as output_file:
