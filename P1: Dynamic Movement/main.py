@@ -1,17 +1,15 @@
-# Names:Gianna Foti, Esther Shore 
+# Names: Gianna Foti, Esther Shore
 # Professor: Jay Sebastian
-# Course: CS330 
+# Course: CS330 AI and Game Dev
+# Assignment: Program 1 Dynamic Movement
 # Due: 23 February 2024
 
 import math
-import numpy as np
 
 # Helper Functions
-
-# calculate length of a 2d vector 
+# calculate length (magnitude) of a 2d vector 
 def length_vec(v):
-	length = math.sqrt(v[0]**2 + v[1]**2)
-	return length
+	return math.sqrt(v[0]**2 + v[1]**2)
 
 # normalize a 2d vector to unit length 1
 def normalize_vec(v):
@@ -120,7 +118,7 @@ class Character:
 		target_vel_dir = normalize_vec(dir_vec)
 		target_vel = multiply_vec(target_speed, target_vel_dir)
 
-		# set accel to get to target vel
+		# set accel to get to target velocity
 		linear_accel_x = target_vel[0] - self.velocity[0]
 		linear_accel_y = target_vel[1] - self.velocity[1]
 		linear_accel_x /= self.time_to_target
@@ -193,6 +191,7 @@ char4 = Character(
     time_to_target=1.0,
 )
 
+# list of character objects
 characters = [char1, char2, char3, char4]
 
 # simulation time parameters in seconds
@@ -203,10 +202,12 @@ sim_time = 0
 
 # run simulation and write to output file
 output_file = open("data.txt", 'w')
-while sim_time <= total_run_time : 
+while sim_time <= total_run_time :
+	# append data for each character to output file
 	with open("data.txt", 'a') as output_file:
 		for char in characters:
 			output_file.write(char.print_csv_data(sim_time))
+	# get new steering output and update position for each character
 	for character in characters:
 		if character.steering_behavior == CONTINUE:
 			outcome = character.get_continue_steering()
@@ -217,6 +218,6 @@ while sim_time <= total_run_time :
 		elif character.steering_behavior == ARRIVE:
 			outcome = character.get_arrive_steering()
 		character.update_position(outcome)
+	# increment simulation time
 	sim_time += time_step
-
 

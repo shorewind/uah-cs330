@@ -126,12 +126,12 @@ plt.plot(0, 0, color='blue', label='linear')
 # format plot and save to file
 plt.xlabel('x')
 plt.ylabel('z')
-plt.title('Dynamic Movement PVL Sample')
+plt.title('Dynamic Movement NE1 0.50 PVL')
 plt.legend(bbox_to_anchor=(1.0, 0.8), loc='lower right')
 plt.xlim(-100, 100)
 plt.ylim(100, -100)
 
-#plt.savefig("outputPlot.png",dpi=200)
+plt.savefig("P1_plot.png",dpi=200)
 plt.show()
 
 
