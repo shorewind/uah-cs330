@@ -13,11 +13,11 @@ def length_vec(v):
 
 # normalize a 2d vector to unit length 1
 def normalize_vec(v):
-    length = length_vec(v)
-    if length != 0:
-        return [v[0]/length, v[1]/length]
-    else:
-        return [0.0, 0.0]
+	length = length_vec(v)
+	if length != 0:
+		return [v[0]/length, v[1]/length]
+	else:
+		return [0.0, 0.0]
 
 # multiply vector v by scalar m
 def multiply_vec(m, v):
@@ -151,44 +151,44 @@ class Character:
 # Simulation
 # intialize four character objects with different steering behaviors
 char1 = Character(
-    char_id=2601
+	char_id=2601
 )
 
 char2 = Character(
-    char_id=2602,
-    steering_behavior=FLEE,
-    position=[-30.0, -50.0],
-    velocity=[2.0, 7.0],
-    linear_accel=[0.0, 0.0],
-    orientation=math.pi/4,
-    max_vel=8.0,
-    max_accel=1.5,
-    target=char1,
+	char_id=2602,
+	steering_behavior=FLEE,
+	position=[-30.0, -50.0],
+	velocity=[2.0, 7.0],
+	linear_accel=[0.0, 0.0],
+	orientation=math.pi/4,
+	max_vel=8.0,
+	max_accel=1.5,
+	target=char1,
 )
 
 char3 = Character(
-    char_id=2603,
-    steering_behavior=SEEK,
-    position=[-50.0, 40.0],
-    velocity=[0.0, 8.0],
-    orientation=3*math.pi/2,
-    max_vel=8.0,
-    max_accel=2.0,
-    target=char1,
+	char_id=2603,
+	steering_behavior=SEEK,
+	position=[-50.0, 40.0],
+	velocity=[0.0, 8.0],
+	orientation=3*math.pi/2,
+	max_vel=8.0,
+	max_accel=2.0,
+	target=char1,
 )
 
 char4 = Character(
-    char_id=2604,
-    steering_behavior=ARRIVE,
-    position=[50.0, 75.0],
-    velocity=[-9.0, 4.0],
-    orientation=math.pi,
-    max_vel=10.0,
-    max_accel=2.0,
-    target=char1,
-    arrival_radius=4.0,
-    slowing_radius=32.0,
-    time_to_target=1.0,
+	char_id=2604,
+	steering_behavior=ARRIVE,
+	position=[50.0, 75.0],
+	velocity=[-9.0, 4.0],
+	orientation=math.pi,
+	max_vel=10.0,
+	max_accel=2.0,
+	target=char1,
+	arrival_radius=4.0,
+	slowing_radius=32.0,
+	time_to_target=1.0,
 )
 
 # list of character objects
