@@ -26,7 +26,7 @@ def multiply_vec(m, v):
 
 # Dynamic Movement Behaviors
 CONTINUE = 1
-SEEK = 5
+SEEK = 6
 FLEE = 7
 ARRIVE = 8  # global constants
 
@@ -104,23 +104,22 @@ class Character:
 		dir_vec = [dir_x, dir_y]
 
 		# if within arrival radius, no steering
-		distance = length_vec(dir_vec)
-		if distance < self.arrival_radius:
-			return {"linear": [0.0, 0.0]}
-
+		dist_to_target = length_vec(dir_vec)
+		if dist_to_target < self.arrival_radius:
+			speed = 0
 		# if within slowing radius, set scaled speed, otherwise max speed
-		if distance > self.slowing_radius:
-			target_speed = self.max_vel
+		elif dist_to_target > self.slowing_radius:
+			speed = self.max_vel
 		else:
-			target_speed = self.max_vel * distance / self.slowing_radius
+			speed = self.max_vel * dist_to_target / self.slowing_radius
 
-		# get velocity by combining direction and speed
-		target_vel_dir = normalize_vec(dir_vec)
-		target_vel = multiply_vec(target_speed, target_vel_dir)
+		# get desired velocity by combining direction and speed
+		vel_dir = normalize_vec(dir_vec)
+		vel = multiply_vec(speed, vel_dir)
 
-		# set accel to get to target velocity
-		linear_accel_x = target_vel[0] - self.velocity[0]
-		linear_accel_y = target_vel[1] - self.velocity[1]
+		# set accel to get to desired velocity
+		linear_accel_x = vel[0] - self.velocity[0]
+		linear_accel_y = vel[1] - self.velocity[1]
 		linear_accel_x /= self.time_to_target
 		linear_accel_y /= self.time_to_target
 		linear_accel = [linear_accel_x, linear_accel_y]
@@ -140,7 +139,7 @@ class Character:
 		self.velocity[0] += steering_output["linear"][0]*time_step
 		self.velocity[1] += steering_output["linear"][1]*time_step
 
-		self.linear_accel = [steering_output["linear"][0], steering_output["linear"][1]]
+		self.linear_accel = steering_output["linear"]
 
 		# clip velocity if it exceeds max velocity
 		if length_vec(self.velocity) > self.max_vel:
@@ -202,11 +201,13 @@ sim_time = 0
 
 # run simulation and write to output file
 output_file = open("data.txt", 'w')
+
 while sim_time <= total_run_time :
 	# append data for each character to output file
 	with open("data.txt", 'a') as output_file:
 		for char in characters:
 			output_file.write(char.print_csv_data(sim_time))
+
 	# get new steering output and update position for each character
 	for character in characters:
 		if character.steering_behavior == CONTINUE:
@@ -218,6 +219,7 @@ while sim_time <= total_run_time :
 		elif character.steering_behavior == ARRIVE:
 			outcome = character.get_arrive_steering()
 		character.update_position(outcome)
+
 	# increment simulation time
 	sim_time += time_step
 
