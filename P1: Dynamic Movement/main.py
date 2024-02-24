@@ -19,7 +19,11 @@ def normalize_vec(v):
     if length != 0:
         return [v[0]/length, v[1]/length]
     else:
-        return [0, 0]
+        return [0.0, 0.0]
+
+# multiply vector v by scalar m
+def multiply_vec(m, v):
+	return [m*v[0], m*v[1]]
 
 
 # Dynamic Movement Behaviors
@@ -64,12 +68,12 @@ class Character:
 			f"{timestamp}, {self.char_id}, {self.position[0]}, {self.position[1]}, "
 			f"{self.velocity[0]}, {self.velocity[1]}, {self.linear_accel[0]}, "
 			f"{self.linear_accel[1]}, {self.orientation}, {self.steering_behavior}, "
-			f"{self.collision_status}"
+			f"{self.collision_status}\n"
 		)
 
 	def get_continue_steering(self):
 		# steering unchanged
-		return {"linear": self.accel}
+		return {"linear": self.linear_accel}
 
 	def get_seek_steering(self):
 		# get direction to target
@@ -79,7 +83,7 @@ class Character:
 
 		# use max accel along direction
 		linear_accel = normalize_vec(dir_vec)
-		linear_accel *= self.max_accel
+		linear_accel = multiply_vec(self.max_accel, linear_accel)
 
 		return {"linear": linear_accel}
 
@@ -91,7 +95,7 @@ class Character:
 
 		# use max accel along direction
 		linear_accel = normalize_vec(dir_vec)
-		linear_accel *= self.max_accel
+		linear_accel = multiply_vec(self.max_accel, linear_accel)
 
 		return {"linear": linear_accel}
 	
@@ -113,8 +117,8 @@ class Character:
 			target_speed = self.max_vel * distance / self.slowing_radius
 		
 		# get velocity by combining direction and speed
-		target_vel = normalize_vec(dir_vec)
-		target_vel *= target_speed
+		target_vel_dir = normalize_vec(dir_vec)
+		target_vel = multiply_vec(target_speed, target_vel_dir)
 
 		# set accel to get to target vel
 		linear_accel_x = target_vel[0] - self.velocity[0]
@@ -126,7 +130,7 @@ class Character:
 		# clip accel if it exceeds max accel
 		if length_vec(linear_accel) > self.max_accel:
 			linear_accel = normalize_vec(linear_accel)
-			linear_accel *= self.max_accel
+			linear_accel = multiply_vec(self.max_accel, linear_accel)
 
 		return {"linear": linear_accel}
 
@@ -143,7 +147,7 @@ class Character:
 		# clip velocity if it exceeds max velocity
 		if length_vec(self.velocity) > self.max_vel:
 			self.velocity = normalize_vec(self.velocity)
-			self.velocity *= self.max_vel
+			self.velocity = multiply_vec(self.max_vel, self.velocity)
 
 
 # Simulation
@@ -191,15 +195,17 @@ char4 = Character(
 
 characters = [char1, char2, char3, char4]
 
-# simulation time parameters
+# simulation time parameters in seconds
 total_run_time = 50
 time_step = 0.5
 num_time_steps = int(total_run_time / time_step)
 sim_time = 0
 
-# run simulation and print to output file
+# run simulation and write to output file
 output_file = open("data.txt", 'w')
 
 with open("data.txt", 'a') as output_file:
 	for char in characters:
-		print(char.print_csv_data(sim_time))
+		# print(char.print_csv_data(sim_time))
+		output_file.write(char.print_csv_data(sim_time))
+
