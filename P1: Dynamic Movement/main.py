@@ -63,10 +63,11 @@ class Character:
 	# output data in comma-separated values format
 	def print_csv_data(self, timestamp):
 		return (
-			f"{timestamp}, {self.char_id}, {self.position[0]}, {self.position[1]}, "
-			f"{self.velocity[0]}, {self.velocity[1]}, {self.linear_accel[0]}, "
-			f"{self.linear_accel[1]}, {self.orientation}, {self.steering_behavior}, "
-			f"{self.collision_status}\n"
+			f"{timestamp}, {self.char_id}, "
+			f"{self.position[0]}, {self.position[1]}, "
+			f"{self.velocity[0]}, {self.velocity[1]}, "
+			f"{self.linear_accel[0]}, {self.linear_accel[1]}, "
+			f"{self.orientation}, {self.steering_behavior}, {self.collision_status}\n"
 		)
 
 	def get_continue_steering(self):
@@ -203,22 +204,23 @@ sim_time = 0
 output_file = open("data.txt", 'w')
 
 while sim_time <= total_run_time :
-	# append data for each character to output file
-	with open("data.txt", 'a') as output_file:
-		for char in characters:
+	for char in characters:
+		# append data for each character to output file
+		with open("data.txt", 'a') as output_file:
 			output_file.write(char.print_csv_data(sim_time))
 
-	# get new steering output and update position for each character
-	for character in characters:
-		if character.steering_behavior == CONTINUE:
-			outcome = character.get_continue_steering()
-		elif character.steering_behavior == SEEK:
-			outcome = character.get_seek_steering()
-		elif character.steering_behavior == FLEE:
-			outcome = character.get_flee_steering()
-		elif character.steering_behavior == ARRIVE:
-			outcome = character.get_arrive_steering()
-		character.update_position(outcome)
+		# get new steering output based on steering behavior
+		if char.steering_behavior == CONTINUE:
+			steering_output = char.get_continue_steering()
+		elif char.steering_behavior == SEEK:
+			steering_output = char.get_seek_steering()
+		elif char.steering_behavior == FLEE:
+			steering_output = char.get_flee_steering()
+		elif char.steering_behavior == ARRIVE:
+			steering_output = char.get_arrive_steering()
+
+		# update character data
+		char.update_position(steering_output)
 
 	# increment simulation time
 	sim_time += time_step
