@@ -203,9 +203,20 @@ sim_time = 0
 
 # run simulation and write to output file
 output_file = open("data.txt", 'w')
+while sim_time <= total_run_time : 
+	with open("data.txt", 'a') as output_file:
+		for char in characters:
+			output_file.write(char.print_csv_data(sim_time))
+	for character in characters:
+		if character.steering_behavior == CONTINUE:
+			outcome = character.get_continue_steering()
+		elif character.steering_behavior == FLEE:
+			outcome = character.get_flee_steering()
+		elif character.steering_behavior == SEEK:
+			outcome = character.get_seek_steering()
+		elif character.steering_behavior == ARRIVE:
+			outcome = character.get_arrive_steering()
+		character.update_position(outcome)
+	sim_time += time_step
 
-with open("data.txt", 'a') as output_file:
-	for char in characters:
-		# print(char.print_csv_data(sim_time))
-		output_file.write(char.print_csv_data(sim_time))
 
