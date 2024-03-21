@@ -28,7 +28,8 @@ def multiply_vec(m, v):
 CONTINUE = 1
 SEEK = 6
 FLEE = 7
-ARRIVE = 8  # global constants
+ARRIVE = 8 
+FOLLOW_PATH = 11 # global constants
 
 class Character:
 	# parameterized constructor with default values
@@ -45,6 +46,8 @@ class Character:
 				arrival_radius=0.0,
 				slowing_radius=0.0,
 				time_to_target=0.0,
+				path_to_follow=None,
+				path_offset=0.0,
 				collision_status=False):
 		self.char_id = char_id
 		self.steering_behavior = steering_behavior
@@ -58,6 +61,8 @@ class Character:
 		self.arrival_radius = arrival_radius
 		self.slowing_radius = slowing_radius
 		self.time_to_target = time_to_target
+		self.path_to_follow = path_to_follow
+		self.path_offset = path_offset
 		self.collision_status = collision_status
 
 	# output data in comma-separated values format
@@ -131,6 +136,9 @@ class Character:
 			linear_accel = multiply_vec(self.max_accel, linear_accel)
 
 		return {"linear": linear_accel}
+	
+	def get_follow_path_steering(self):
+		pass
 
 	def update_position(self, steering_output):
 		# set new position, velocity, and linear accel
@@ -149,53 +157,22 @@ class Character:
 
 
 # Simulation
-# intialize four character objects with different steering behaviors
+# intialize character object
 char1 = Character(
-	char_id=2601
-)
-
-char2 = Character(
-	char_id=2602,
-	steering_behavior=FLEE,
-	position=[-30.0, -50.0],
-	velocity=[2.0, 7.0],
-	linear_accel=[0.0, 0.0],
-	orientation=math.pi/4,
-	max_vel=8.0,
-	max_accel=1.5,
-	target=char1,
-)
-
-char3 = Character(
-	char_id=2603,
-	steering_behavior=SEEK,
-	position=[-50.0, 40.0],
-	velocity=[0.0, 8.0],
-	orientation=3*math.pi/2,
-	max_vel=8.0,
+	char_id=2701,
+	steering_behavior=FOLLOW_PATH,
+	position=[20.0, 95.0],
+	max_vel=4.0,
 	max_accel=2.0,
-	target=char1,
-)
-
-char4 = Character(
-	char_id=2604,
-	steering_behavior=ARRIVE,
-	position=[50.0, 75.0],
-	velocity=[-9.0, 4.0],
-	orientation=math.pi,
-	max_vel=10.0,
-	max_accel=2.0,
-	target=char1,
-	arrival_radius=4.0,
-	slowing_radius=32.0,
-	time_to_target=1.0,
+	path_to_follow=1,
+	path_offset=0.04
 )
 
 # list of character objects
-characters = [char1, char2, char3, char4]
+characters = [char1]
 
 # simulation time parameters in seconds
-total_run_time = 50
+total_run_time = 125
 time_step = 0.5
 num_time_steps = int(total_run_time / time_step)
 sim_time = 0
