@@ -16,7 +16,7 @@ import csv
 import math
 
 # Change this to data file name
-filename = "Trajectory_data.txt"
+filename = "data.txt"
 
 # Create Path Following Path 
 path_follow = True
@@ -161,10 +161,10 @@ plt.plot(0, 0, color='blue', label='linear')
 # Format plot and save to file
 plt.xlabel('x')
 plt.ylabel('z')
-plt.title('Dynamic Movement Plotter')
+plt.title('Dynamic Movement NE1 0.50 PVLH')
 plt.legend(bbox_to_anchor=(1.0, 0.1), loc='lower right')
 plt.xlim(-100, 100)
 plt.ylim(100, -100)
 
-# plt.savefig("outputPlot.png",dpi=200)
+plt.savefig("P2_plot.png",dpi=200)
 plt.show()
