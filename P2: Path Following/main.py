@@ -7,6 +7,26 @@
 import math
 
 # Helper Functions
+# add 2d vectors
+def add_vec(v1, v2):
+    v_x = v1[0] + v2[0]
+    v_y = v1[1] + v2[1]
+    return [v_x, v_y]
+
+# subtract 2d vectors (v1 - v2)
+def subtract_vec(v1, v2):
+    v_x = v1[0] - v2[0]
+    v_y = v1[1] - v2[1]
+    return [v_x, v_y]
+
+# multiply vector v by scalar m
+def multiply_vec(m, v):
+	return [m*v[0], m*v[1]]
+
+# divide vector v by scalar m
+def divide_vec(v, m):
+	return [v[0]/m, v[1]/m]
+
 # calculate length (magnitude) of a 2d vector
 def length_vec(v):
 	return math.sqrt(v[0]**2 + v[1]**2)
@@ -19,33 +39,19 @@ def normalize_vec(v):
 	else:
 		return [0.0, 0.0]
 
-# multiply vector v by scalar m
-def multiply_vec(m, v):
-	return [m*v[0], m*v[1]]
-
 # calculate scalar dot product of two 2D vectors
 def dot(v1, v2):
     return v1[0]*v2[0] + v1[1]*v2[1]
 
-# find the point on the line closest to the query point in 2D
-def closest_point_line(x, z, q):
-    point = dot((q - x),(z - x))
-    point /= dot((z - x), (z - x))
-    point = (x + (point * (z - x)))
-    return point
-
-# find the point on the segment closest to the query point in 2D
-# q is the query point and x and z are distinct points on the line
-def closest_point_segment(x, z, q):
-    point = dot((q - x), (z - x))
-    point /= dot((z - x), (z - x))
-    if (point <= 0):
-        return x
-    elif (point >= 1):
-        return z
+# find the point on the segment AB closest to the query point Q in 2D
+def closest_point_segment(Q, A, B):
+    T = dot(subtract_vec(Q, A), subtract_vec(B, A)) / dot(subtract_vec(B, A), subtract_vec(B, A))
+    if (T <= 0):
+        return A
+    elif (T >= 1):
+        return B
     else:
-        point = (x + (point * (z - x)))
-        return point
+    	return add_vec(A, multiply_vec(T, subtract_vec(B, A)))
 	
 # calculate the distance between two points in 2D
 def distance_point_point(x, z):
@@ -60,12 +66,6 @@ def distance_point_line(x, z, q):
     numerator = abs(((x2 - x1) * (y1 - y0)) - ((x1 - x0) * (y2 - y1)))
     denominator = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return numerator / denominator
-
-# subtract 2d vectors (v1 - v2)
-def subtract_vec(v1, v2):
-    v_x = v1[0] - v2[0]
-    v_y = v1[1] - v2[1]
-    return [v_x, v_y]	
 
 
 # Dynamic Movement Behaviors
@@ -88,20 +88,42 @@ class Path:
 	def assemble(self):
 		self.num_segments = len(self.x) - 1
 		self.distance_list = [0.0] * (self.num_segments + 1)
-		for i in range(1, self.num_segments + 1):
+		for i in range(1, self.num_segments+1):
 			self.distance_list[i] = self.distance_list[i-1] + distance_point_point([self.x[i-1], self.y[i-1]], [self.x[i], self.y[i]])
 		self.param_list = [0.0] * (self.num_segments + 1)
-		for i in range(1, self.num_segments + 1):
+		for i in range(1, self.num_segments+1):
 			self.param_list[i] = self.distance_list[i] / max(self.distance_list)
 
 
 	def get_position(self, param):
-
-		return param
+		i = max([i for i in range(len(self.param_list)) if param > self.param_list[i]])
+		A = [self.x[i], self.y[i]]
+		B = [self.x[i+1], self.y[i+1]]
+		T = (param - self.param_list[i]) / (self.param_list[i+1] - self.param_list[i])
+		P = add_vec(A, multiply_vec(T, subtract_vec(B, A)))
+		return P
 
 	def get_param(self, position):
+		closest_distance = float("inf")
+		
+		for i in range(0, self.num_segments):
+			A = [self.x[i], self.y[i]]
+			B = [self.x[i+1], self.y[i+1]]
+			point = closest_point_segment(position, A, B)
+			distance = distance_point_point(position, point)
+			if (distance < closest_distance):
+				closest_point = point
+				closest_distance = distance
+				closest_segment = i
 
-		return position
+		A = [self.x[closest_segment], self.y[closest_segment]]
+		A_param = self.param_list[closest_segment]
+		B = [self.x[closest_segment+1], self.y[closest_segment+1]]
+		B_param = self.param_list[closest_segment+1]
+		C = closest_point
+		T = length_vec(subtract_vec(C, A)) / length_vec(subtract_vec(B, A))
+		C_param = A_param + (T * (B_param - A_param))
+		return C_param
 
 
 class Character:
@@ -211,8 +233,16 @@ class Character:
 		return {"linear": linear_accel}
 	
 	def get_follow_path_steering(self):
+		path = self.path_to_follow
+		current_param = path.get_param(self.position)
 
-		return {"linear": self.linear_accel}
+		target_param = current_param + self.path_offset
+		if target_param >= 1:
+			target_param = 1
+		
+		self.target = Character()
+		self.target.position = path.get_position(target_param)
+		return self.get_seek_steering()
 
 	def update_position(self, steering_output):
 		# set new position, velocity, and linear accel
