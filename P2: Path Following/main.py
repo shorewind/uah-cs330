@@ -56,6 +56,26 @@ FLEE = 7
 ARRIVE = 8 
 FOLLOW_PATH = 11 # global constants
 
+
+class Path:
+	def __init__(self, id=1, x=0.0, y=0.0, segments=[0.0], param=0.0, distance=0.0):
+		self.id = id
+		self.x = x
+		self.y = y
+		self.segments = segments
+		self.param = param
+		self.distance = distance
+
+	def assemble(self):
+		pass
+
+	def get_position(self):
+		pass
+
+	def get_param(self):
+		pass
+
+
 class Character:
 	# parameterized constructor with default values
 	def __init__(self,
