@@ -23,21 +23,20 @@ def normalize_vec(v):
 def multiply_vec(m, v):
 	return [m*v[0], m*v[1]]
 
-# Calculate scalar dot product of two 2D vectors.
-def dot(v1,v2):
-    sum = ([v1[0]*v2[0] + v1[1]*v2[1]])
-    return sum
+# calculate scalar dot product of two 2D vectors
+def dot(v1, v2):
+    return v1[0]*v2[0] + v1[1]*v2[1]
 
-# Find the point on the line closest to the query point in 2D.
-def closestPointLine(x,z,q):
+# find the point on the line closest to the query point in 2D
+def closest_point_line(x, z, q):
     point = dot((q - x),(z - x))
     point /= dot((z - x), (z - x))
     point = (x + (point * (z - x)))
     return point
 
-# Find the point on the segment closest to the query point in 2D.
-#q is the query point and x and z are distinct points on the line
-def closestPointSegment(x,z,q):
+# find the point on the segment closest to the query point in 2D
+# q is the query point and x and z are distinct points on the line
+def closest_point_segment(x, z, q):
     point = dot((q - x), (z - x))
     point /= dot((z - x), (z - x))
     if (point <= 0):
@@ -48,18 +47,18 @@ def closestPointSegment(x,z,q):
         point = (x + (point * (z - x)))
         return point
 	
-#calculate the distance between two points in 2D
-def distancePointPoint(x,z):
-    distance = math.sqrt((z[1]-x[1])**2 + (z[2]-x[2])**2)
+# calculate the distance between two points in 2D
+def distance_point_point(x, z):
+    distance = math.sqrt((z[0]-x[0])**2 + (z[1]-x[1])**2)
     return distance
 
-# Calculate the distance from a point to a line in 2D.
-def distancePointLine(x, z, q):
+# calculate the distance from a point to a line in 2D
+def distance_point_line(x, z, q):
     x0, y0 = x
     x1, y1 = z
     x2, y2 = q
     numerator = abs(((x2 - x1) * (y1 - y0)) - ((x1 - x0) * (y2 - y1)))
-    denominator = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    denominator = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return numerator / denominator
 
 # subtract 2d vectors (v1 - v2)
@@ -78,22 +77,31 @@ FOLLOW_PATH = 11 # global constants
 
 
 class Path:
-	def __init__(self, id=1, x=0.0, y=0.0, segments=[0.0], param=0.0, distance=0.0):
+	def __init__(self, id=1, x=[], y=[], num_segments=0, param_list=[], distance_list=[]):
 		self.id = id
 		self.x = x
 		self.y = y
-		self.segments = segments
-		self.param = param
-		self.distance = distance
+		self.num_segments = num_segments
+		self.param_list = param_list
+		self.distance_list = distance_list
 
 	def assemble(self):
-		pass
+		self.num_segments = len(self.x) - 1
+		self.distance_list = [0.0] * (self.num_segments + 1)
+		for i in range(1, self.num_segments + 1):
+			self.distance_list[i] = self.distance_list[i-1] + distance_point_point([self.x[i-1], self.y[i-1]], [self.x[i], self.y[i]])
+		self.param_list = [0.0] * (self.num_segments + 1)
+		for i in range(1, self.num_segments + 1):
+			self.param_list[i] = self.distance_list[i] / max(self.distance_list)
 
-	def get_position(self):
-		pass
 
-	def get_param(self):
-		pass
+	def get_position(self, param):
+
+		return param
+
+	def get_param(self, position):
+
+		return position
 
 
 class Character:
@@ -203,7 +211,8 @@ class Character:
 		return {"linear": linear_accel}
 	
 	def get_follow_path_steering(self):
-		pass
+
+		return {"linear": self.linear_accel}
 
 	def update_position(self, steering_output):
 		# set new position, velocity, and linear accel
@@ -222,6 +231,14 @@ class Character:
 
 
 # Simulation
+path1 = Path(
+	id=1,
+	x=[0, -20, 20, -40, 40, -60, 60, 0],
+	y=[90, 65, 40, 15, -10, -35, -60, -85],
+)
+
+path1.assemble()
+
 # intialize character object
 char1 = Character(
 	char_id=2701,
@@ -229,7 +246,7 @@ char1 = Character(
 	position=[20.0, 95.0],
 	max_vel=4.0,
 	max_accel=2.0,
-	path_to_follow=1,
+	path_to_follow=path1,
 	path_offset=0.04
 )
 
@@ -260,6 +277,8 @@ while sim_time <= total_run_time :
 			steering_output = char.get_flee_steering()
 		elif char.steering_behavior == ARRIVE:
 			steering_output = char.get_arrive_steering()
+		elif char.steering_behavior == FOLLOW_PATH:
+			steering_output = char.get_follow_path_steering()
 
 		# update character data
 		char.update_position(steering_output)
