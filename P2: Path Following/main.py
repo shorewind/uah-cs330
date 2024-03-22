@@ -23,6 +23,31 @@ def normalize_vec(v):
 def multiply_vec(m, v):
 	return [m*v[0], m*v[1]]
 
+# Calculate scalar dot product of two 2D vectors.
+def dot(v1,v2):
+    sum = ([v1[0]*v2[0] + v1[1]*v2[1]])
+    return sum
+
+# Find the point on the line closest to the query point in 2D.
+def closestPointLine(x,z,q):
+    point = dot((q - x),(z - x))
+    point /= dot((z - x), (z - x))
+    point = (x + (point * (z - x)))
+    return point
+
+# Find the point on the segment closest to the query point in 2D.
+#q is the query point and x and z are distinct points on the line
+def closestPointSegment(x,z,q):
+    point = dot((q - x), (z - x))
+    point /= dot((z - x), (z - x))
+    if (point <= 0):
+        return x
+    elif (point >= 1):
+        return z
+    else:
+        point = (x + (point * (z - x)))
+        return point
+
 
 # Dynamic Movement Behaviors
 CONTINUE = 1
