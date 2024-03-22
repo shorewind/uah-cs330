@@ -47,6 +47,26 @@ def closestPointSegment(x,z,q):
     else:
         point = (x + (point * (z - x)))
         return point
+	
+#calculate the distance between two points in 2D
+def distancePointPoint(x,z):
+    distance = math.sqrt((z[1]-x[1])**2 + (z[2]-x[2])**2)
+    return distance
+
+# Calculate the distance from a point to a line in 2D.
+def distancePointLine(x, z, q):
+    x0, y0 = x
+    x1, y1 = z
+    x2, y2 = q
+    numerator = abs(((x2 - x1) * (y1 - y0)) - ((x1 - x0) * (y2 - y1)))
+    denominator = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return numerator / denominator
+
+# subtract 2d vectors (v1 - v2)
+def subtract_vec(v1, v2):
+    v_x = v1[0] - v2[0]
+    v_y = v1[1] - v2[1]
+    return [v_x, v_y]	
 
 
 # Dynamic Movement Behaviors
