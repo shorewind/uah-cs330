@@ -63,18 +63,18 @@ class Graph:
 
 # A*
 def find_lowest(graph, open_nodes):
-    min_total = float ('inf')
+    min_total = float('inf')
     min_node = None
 
     for node in open_nodes:
-        current_total = graph['nodes'][node]['total']
+        current_total = graph.nodes[node].total
         if current_total < min_total:
             min_total = current_total
             min_node = node
     return min_node
 
 def heuristic(graph, node1, node2):
-    distance = math.sqrt((graph.nodes[node2]['x'] - graph.nodes[node1]['x'])**2 + (graph.nodes[node2]['z'] - graph.nodes[node1]['z'])**2)
+    distance = math.sqrt((graph.nodes[node2].loc_x - graph.nodes[node1].loc_x)**2 + (graph.nodes[node2].loc_z - graph.nodes[node1].loc_z)**2)
     return distance 
 
 def get_connections(graph, current_node):
@@ -145,7 +145,7 @@ with open("CS 330, Pathfinding, Graph AB Nodes v3.txt", 'r') as nodes_file:
         fields = line.strip().split(',')
         fields = [field.strip() for field in fields]
         if fields[0] == '"N"':
-            current_node = Node(int(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], fields[8])
+            current_node = Node(int(fields[1]), int(fields[2]), float(fields[3]), float(fields[4]), float(fields[5]), int(fields[6]), float(fields[7]), float(fields[8]))
             graph.add_node(current_node)
 
 # load connections to graph
@@ -154,9 +154,12 @@ with open("CS 330, Pathfinding, Graph AB Connections v3.txt", 'r') as connection
         fields = line.strip().split(',')
         fields = [field.strip() for field in fields]
         if fields[0] == '"C"':
-            current_connection = Connection(int(fields[1]), fields[2], fields[3], fields[4])
+            current_connection = Connection(int(fields[1]), int(fields[2]), int(fields[3]), float(fields[4]))
             graph.add_connection(current_connection)
 
 # run A*
-find_path(graph, 1, 29)
-retrieve_path(graph, 1, 29)
+test_cases = [(1, 29), (1, 38), (11, 1), (33, 66), (58, 43)]
+
+for start_node, goal_node in test_cases:
+    find_path(graph, start_node, goal_node)
+    retrieve_path(graph, start_node, goal_node)
