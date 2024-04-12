@@ -10,6 +10,8 @@
 # paths
 # 1 to 29
 
+import math
+
 UNDEFINED = 0
 UNVISITED = 1
 OPEN = 2
@@ -59,19 +61,27 @@ class Graph:
         for connection in self.connections.values():
             print(f"C {connection.number} {connection.from_node} {connection.to_node} {connection.cost}\n")
 
-
-open_nodes = []
-
 # A*
 def find_lowest(graph, open_nodes):
-    return 1
+    min_total = float ('inf')
+    min_node = None
+
+    for node in open_nodes:
+        current_total = graph['nodes'][node]['total']
+        if current_total < min_total:
+            min_total = current_total
+            min_node = node
+    return min_node
 
 def heuristic(graph, node1, node2):
-    return 1
+    distance = math.sqrt((graph.nodes[node2]['x'] - graph.nodes[node1]['x'])**2 + (graph.nodes[node2]['z'] - graph.nodes[node1]['z'])**2)
+    return distance 
 
 def get_connections(graph, current_node):
     connections = [num for num, connection in graph.connections.items() if connection.from_node == current_node]
     return connections
+
+open_nodes = []
 
 def find_path(graph, start_node, goal_node):
     # initialize node array
