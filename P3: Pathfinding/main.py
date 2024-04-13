@@ -4,14 +4,10 @@
 # Assignment: Program 3 Pathfinding
 # Due: 12 April 2024
 
-# output structure of loaded graph (nodes, connections, connection weights)
-# output shortest path for each of five pairs of nodes
-
-# paths
-# 1 to 29
-
 import math
+from datetime import datetime
 
+# constants
 UNDEFINED = 0
 UNVISITED = 1
 OPEN = 2
@@ -49,19 +45,9 @@ class Graph:
     def add_connection(self, connection):
         self.connections[connection.number] = connection
 
-    def print_nodes(self):
-        for node in self.nodes.values():
-            print(
-                    f"N {node.number} "
-                    f"{node.status} {node.cost_so_far} {node.heuristic} {node.total} {node.previous} "
-                    f"{node.loc_x} {node.loc_z}\n"
-                )
 
-    def print_connections(self):
-        for connection in self.connections.values():
-            print(f"C {connection.number} {connection.from_node} {connection.to_node} {connection.cost}\n")
-
-# A*
+# A* helper functions
+# find open node with lowest total cost
 def find_lowest(graph, open_nodes):
     min_total = float('inf')
     min_node = None
@@ -73,16 +59,20 @@ def find_lowest(graph, open_nodes):
             min_node = node
     return min_node
 
+# calculate heuristic value using standard Euclidean 2D distance
 def heuristic(graph, node1, node2):
     distance = math.sqrt((graph.nodes[node2].loc_x - graph.nodes[node1].loc_x)**2 + (graph.nodes[node2].loc_z - graph.nodes[node1].loc_z)**2)
     return distance 
 
+# get all outgoing connections for current node
 def get_connections(graph, current_node):
     connections = [num for num, connection in graph.connections.items() if connection.from_node == current_node]
     return connections
 
+# initialize list of open nodes
 open_nodes = []
 
+# find path from start node to goal node using A*
 def find_path(graph, start_node, goal_node):
     # initialize node array
     for node_num in range(1, len(graph.nodes) + 1):
@@ -96,6 +86,7 @@ def find_path(graph, start_node, goal_node):
     iteration = 0
     open_nodes.append(start_node)
 
+    # execute once for each node or until path found
     while len(open_nodes) > 0:
         iteration = iteration + 1
 
@@ -120,6 +111,7 @@ def find_path(graph, start_node, goal_node):
         graph.nodes[current_node].status = CLOSED
         open_nodes.remove(current_node)
 
+# retrieve path nodes from start node to goal node
 def retrieve_path(graph, start_node, goal_node):
     path = []
     current_node = goal_node
@@ -130,13 +122,11 @@ def retrieve_path(graph, start_node, goal_node):
     if current_node == start_node:
         path.append(start_node)
         path.reverse()
-        print(f"Path from {start_node} to {goal_node} path={path} cost={graph.nodes[goal_node].cost_so_far}")
     else:
         path = []
-        print(f"Path from {start_node} to {goal_node} not found")
     return path
 
-
+# initialize graph object of nodes and connections
 graph = Graph()
 
 # load nodes to graph
@@ -157,9 +147,31 @@ with open("CS 330, Pathfinding, Graph AB Connections v3.txt", 'r') as connection
             current_connection = Connection(int(fields[1]), int(fields[2]), int(fields[3]), float(fields[4]))
             graph.add_connection(current_connection)
 
-# run A*
+# run A* and output results to file
 test_cases = [(1, 29), (1, 38), (11, 1), (33, 66), (58, 43)]
 
-for start_node, goal_node in test_cases:
-    find_path(graph, start_node, goal_node)
-    retrieve_path(graph, start_node, goal_node)
+with open(f"CS 330, Pathfinding, Trace Adventure Bay AB {datetime.today().strftime('%Y-%m-%d')}.txt", 'w') as output_file:
+    output_file.write(f"CS 330, Pathfinding, Begin {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+    output_file.write("Loaded scenario Adventure Bay AB\n\n")
+
+    output_file.write("Nodes\n")
+    for node in graph.nodes.values():
+        output_file.write(
+                f"N {node.number} "
+                f"{node.status} {node.cost_so_far} {node.heuristic} {node.total} {node.previous} "
+                f"{node.loc_x} {node.loc_z}\n"
+            )
+
+    output_file.write("\nConnections\n")
+    for connection in graph.connections.values():
+        output_file.write(f"C {connection.number} {connection.from_node} {connection.to_node} {connection.cost}\n")
+
+    for start_node, goal_node in test_cases:
+        find_path(graph, start_node, goal_node)
+        path = retrieve_path(graph, start_node, goal_node)
+        if path:
+            output_file.write(f"\nPath from {start_node} to {goal_node} path= {' '.join(str(node) for node in path)} cost= {graph.nodes[goal_node].cost_so_far}")
+        else:
+            output_file.write(f"\nPath from {start_node} to {goal_node} not found")
+
+    output_file.write(f"\n\nCS 330, Pathfinding, End {datetime.today().strftime('%Y-%m-%d %H:%M:%S')}\n")
