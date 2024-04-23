@@ -1,4 +1,4 @@
-CS 330, Pathfinding, Begin 2024-04-12 22:28:45
+CS 330, Pathfinding, Begin 2024-04-12 22:30:19
 
 Loaded scenario Adventure Bay AB
 
@@ -231,4 +231,4 @@ Path from 11 to 1 path= 11 12 13 14 15 16 17 18 19 20 21 22 23 3 2 1 cost= 309.0
 Path from 33 to 66 path= 33 13 14 15 16 17 18 46 47 64 66 cost= 201.0
 Path from 58 to 43 path= 58 48 49 50 51 52 53 44 38 40 43 cost= 208.0
 
-CS 330, Pathfinding, End 2024-04-12 22:28:45
+CS 330, Pathfinding, End 2024-04-12 22:30:19
