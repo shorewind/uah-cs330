@@ -141,7 +141,7 @@ with open(f"CS 330 Program 4 Scenario {scenario}.txt", 'w') as output_file:
     output_file.write(f"scenario                = {scenario}\n")
     output_file.write(f"trace                   = {trace}\n")
     output_file.write(f"iterations              = {iterations}\n")
-    output_file.write(f"transition probabilities= {transition_probability}\n")
+    output_file.write(f"transition probabilities = {transition_probability}\n")
     output_file.write(f"state counts            = {state_counter}\n")
     output_file.write(f"state frequencies       = {state_freq}\n")
     output_file.write(f"transition counts       = {transition_counter}\n")
