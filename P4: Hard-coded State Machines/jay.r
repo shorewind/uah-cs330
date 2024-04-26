@@ -32,8 +32,8 @@ num.width  <- function(x, left, right) { format(round(x, right),  nsmall=right, 
 
 # Initialize output file and report program begin to output file.
 
-computer    <- 2
-output.path <- c("C:/Users/mpetty/Desktop/Working, CS 330/", "Z:/UAH/CS330 Fall 2022/Source Material/R Code/")[computer]
+
+output.path <- getwd()
 output.file <- paste(output.path, "CS 330, State machines, Scenario ", scenario, " ", Sys.Date(), ".txt", sep="")
 
 write.text(output.file, paste("CS 330, State machines, Begin", Sys.time(), "\n"), TRUE)
