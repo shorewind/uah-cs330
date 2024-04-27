@@ -17,7 +17,7 @@ DECELERATE = 6
 DONE = 7 
 
 # selecting scenario 
-scenario = 1  # can be 1 or 2
+scenario = 2  # can be 1 or 2
 trace = [True, False] [scenario - 1]
 iterations = [100, 1000000][scenario - 1]
 transition_probability = [ 
@@ -80,7 +80,7 @@ for i in range(iterations):
                 state = ACCELERATE
                 accelerate_action()
             elif (r < sum(transition_probability[i] for i in [1, 3])):
-                transition_counter[2] += 1
+                transition_counter[3] += 1
                 state = PULL_IN_BEHIND
                 pull_in_behind_action()
             else:
@@ -92,11 +92,11 @@ for i in range(iterations):
                 state = PULL_IN_AHEAD
                 pull_in_ahead_action()
             elif (r < sum(transition_probability[i] for i in [2, 4])):
-                transition_counter[3] += 1
+                transition_counter[4] += 1
                 state = PULL_IN_BEHIND
                 pull_in_behind_action()
             elif (r < sum(transition_probability[i] for i in [2, 4, 5])):
-                transition_counter[4] += 1
+                transition_counter[5] += 1
                 state = DECELERATE
                 decelerate_action()
             else:
